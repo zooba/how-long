@@ -1,0 +1,87 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "siteName": { "type": "string" },
+    "dbAdminUser": { "type": "string" },
+    "dbAdminPassword": { "type": "string" },
+    "dbName": { "type": "string" },
+    "hostingPlanName": { "type": "string" },
+    "companyName": { "type": "string" }
+  },
+  "variables": {
+    "dbServerName": "[concat('db', uniqueString(resourceGroup().id))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('hostingPlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "sku": { "name": "F1" },
+      "properties": { }
+    },
+    {
+      "apiVersion": "2014-04-01-preview",
+      "name": "[variables('dbServerName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "administratorLogin": "[parameters('dbAdminUser')]",
+        "administratorLoginPassword": "[parameters('dbAdminPassword')]",
+        "version": "12.0"
+      },
+      "resources": [
+        {
+          "apiVersion": "2014-04-01-preview",
+          "name": "[parameters('dbName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [ "[resourceId('Microsoft.Sql/servers', variables('dbServerName'))]" ],
+          "properties": { }
+        },
+        {
+          "apiVersion": "2014-04-01-preview",
+          "name": "AllowAllWindowsAzureIps",
+          "type": "firewallrules",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [ "[resourceId('Microsoft.Sql/servers', variables('dbServerName'))]" ],
+          "properties": {
+            "startIpAddress": "0.0.0.0",
+            "endIpAddress": "0.0.0.0"
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('siteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [ "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]" ],
+      "properties": {
+        "serverFarmId": "[parameters('hostingPlanName')]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
+            "[resourceId('Microsoft.Sql/servers/databases', variables('dbServerName'), parameters('dbName'))]"
+          ],
+          "properties": {
+            "COMPANY_NAME": "[parameters('companyName')]",
+
+            "DB_HOST": "[concat(variables('dbServerName'), '.database.windows.net')]",
+            "DB_PORT": "1433",
+            "DB_NAME": "[parameters('dbName')]",
+            "DB_USER": "[parameters('dbAdminUser')]",
+            "DB_PASSWORD": "[parameters('dbAdminPassword')]"
+          }
+        }
+      ]
+    }
+  ]
+}

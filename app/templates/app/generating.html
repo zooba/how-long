@@ -1,0 +1,25 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+<div class="jumbotron">
+    <h2>Generating</h2>
+    <p>
+        We are now generating some more test data. Return to the home page or
+        refresh to generate more.
+    </p>
+</div>
+    {% if output %}
+<div class="row">
+    <pre>Standard Output:
+{{output}}</pre>
+</div>
+    {% endif %}
+    {% if error %}
+<div class="row">
+    <pre>Standard Error:
+{{error}}</pre>
+</div>
+    {% endif %}
+
+{% endblock %}

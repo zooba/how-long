@@ -1,0 +1,11 @@
+{% extends "app/layout.html" %}
+
+{% load render_table from django_tables2 %}
+{% block content %}
+
+<div class="row">
+    <h2>Employees</h2>
+    {% render_table employees %}
+</div>
+
+{% endblock %}
