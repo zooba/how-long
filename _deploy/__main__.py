@@ -197,6 +197,10 @@ try:
             zip.write(str(src), dest)
     site.upload_zip(zip_data.getvalue(), 'site/wwwroot')
 
+    # Trigger a Django collectstatic on the server
+    print('Migrating Django DB')
+    print(site.exec(r"D:\home\site\python\python.exe D:\home\site\wwwroot\manage.py collectstatic --noinput", r"D:\home\site\wwwroot"))
+
     # Trigger a Django migrate on the server
     print('Migrating Django DB')
     print(site.exec(r"D:\home\site\python\python.exe D:\home\site\wwwroot\manage.py migrate", r"D:\home\site\wwwroot"))
@@ -213,7 +217,7 @@ try:
 
     if 'y' in input("Browse to {}? [y/N] ".format(host_names[0])).lower():
         import webbrowser
-        webbrowser.open(conf.host_names[0])
+        webbrowser.open(host_names[0])
 
 finally:
     #################################################

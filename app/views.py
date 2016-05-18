@@ -5,6 +5,7 @@ Definition of views.
 import os
 import subprocess
 import sys
+import traceback
 
 from django.shortcuts import render
 from django.http import HttpRequest
@@ -53,18 +54,13 @@ def employees(request):
     )
 
 def generate(request):
-    p = subprocess.Popen([
-        sys.executable,
-        os.path.join(os.path.abspath(__file__), '..', '..', 'create_test_data.py')
-    ], universal_newlines=True)
-
-    output, error = '', ''
+    script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'create_test_data.py')
     try:
-        p.wait(500)
-    except subprocess.TimeoutExpired:
-        pass
-    else:
-        output, error = p.communicate()
+        output = subprocess.check_output([sys.executable, script], universal_newlines=True, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as ex:
+        output = ex.output
+    except Exception:
+        output = traceback.format_exc()
 
     return render(
         request,
@@ -74,6 +70,5 @@ def generate(request):
             'year':datetime.now().year,
             'company': os.getenv('COMPANY_NAME', 'Our Company'),
             'output': output,
-            'error': error,
         }
     )

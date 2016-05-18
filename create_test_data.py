@@ -1,12 +1,6 @@
 import os
 import sys
 
-raise ValueError()
-
-if sys.platform == 'win32':
-    import ctypes
-    ctypes.WinDLL('kernel32').AddDllDirectory(os.path.join(os.path.abspath(__file__), '..', 'FreeTDS'))
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "HowLong.settings")
 
 import django

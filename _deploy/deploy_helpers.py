@@ -10,18 +10,29 @@ import sys
 
 def get_package(name):
     n = Path(name)
-    for root in find_spec(name).submodule_search_locations:
-        r = Path(root)
-        yield from ((f, str(n / f.relative_to(r))) for f in r.rglob('**/*'))
+    spec = find_spec(name)
+    if spec:
+        for root in spec.submodule_search_locations:
+            r = Path(root)
+            yield from ((f, str(n / f.relative_to(r))) for f in r.rglob('**/*'))
+        return
+
+    path = Path(__file__).absolute().parent / name
+    if path.is_dir():
+        yield from ((f, str(f.relative_to(path.parent))) for f in path.rglob('**/*'))
 
 def get_requirements(requirements, target):
     requirements = Path(requirements)
     target = Path(target)
 
-    subprocess.check_output([
-        sys.executable, '-m', 'pip', 'install',
-        '-r', str(requirements), '--target', str(target)
-    ])
+    try:
+        output = subprocess.check_output([
+            sys.executable, '-m', 'pip', 'install',
+            '-r', str(requirements), '--target', str(target)
+        ], stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError:
+        print(output)
+        raise
     return ((f, str(f.relative_to(target))) for f in target.rglob('**/*'))
 
 def print_operation_results(resources_client, resource_group, deployment):
