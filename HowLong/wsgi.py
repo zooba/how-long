@@ -24,5 +24,6 @@ from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
 # Apply WSGI middleware here.
-# from helloworld.wsgi import HelloWorldApplication
-# application = HelloWorldApplication(application)
+if os.getenv('INSTRUMENTATION_KEY'):
+    from applicationinsights.requests import WSGIApplication as AppInsightsMiddleware
+    application = AppInsightsMiddleware(os.getenv('INSTRUMENTATION_KEY'), application)

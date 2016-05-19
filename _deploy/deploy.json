@@ -3,6 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "siteName": { "type": "string" },
+    "appInsightsName": { "type": "string", "defaultValue": "appinsights" },
     "dbAdminUser": { "type": "string" },
     "dbAdminPassword": { "type": "string" },
     "dbName": { "type": "string" },
@@ -18,7 +19,7 @@
       "name": "[parameters('hostingPlanName')]",
       "type": "Microsoft.Web/serverfarms",
       "location": "[resourceGroup().location]",
-      "sku": { "name": "F1" },
+      "sku": { "name": "S1" },
       "properties": { }
     },
     {
@@ -54,6 +55,16 @@
       ]
     },
     {
+      "apiVersion": "2014-04-01",
+      "name": "[parameters('appInsightsName')]",
+      "type": "Microsoft.Insights/components",
+      "location": "Central US",
+      "tags": { },
+      "properties": {
+        "applicationId": "[parameters('siteName')]"
+      }
+    },
+    {
       "apiVersion": "2015-08-01",
       "name": "[parameters('siteName')]",
       "type": "Microsoft.Web/sites",
@@ -69,7 +80,8 @@
           "type": "config",
           "dependsOn": [
             "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
-            "[resourceId('Microsoft.Sql/servers/databases', variables('dbServerName'), parameters('dbName'))]"
+            "[resourceId('Microsoft.Sql/servers/databases', variables('dbServerName'), parameters('dbName'))]",
+            "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]"
           ],
           "properties": {
             "COMPANY_NAME": "[parameters('companyName')]",
@@ -78,7 +90,9 @@
             "DB_PORT": "1433",
             "DB_NAME": "[parameters('dbName')]",
             "DB_USER": "[parameters('dbAdminUser')]",
-            "DB_PASSWORD": "[parameters('dbAdminPassword')]"
+            "DB_PASSWORD": "[parameters('dbAdminPassword')]",
+
+            "INSTRUMENTATION_KEY": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2014-04-01').InstrumentationKey]"
           }
         }
       ]
