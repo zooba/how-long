@@ -3,7 +3,6 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "siteName": { "type": "string" },
-    "appInsightsName": { "type": "string", "defaultValue": "appinsights" },
     "dbAdminUser": { "type": "string" },
     "dbAdminPassword": { "type": "string" },
     "dbName": { "type": "string" },
@@ -11,7 +10,8 @@
     "companyName": { "type": "string" }
   },
   "variables": {
-    "dbServerName": "[concat('db', uniqueString(resourceGroup().id))]"
+    "dbServerName": "[concat('db', uniqueString(resourceGroup().id))]",
+    "appInsightsName": "[concat('ai', uniqueString(resourceGroup().id))]"
   },
   "resources": [
     {
@@ -56,7 +56,7 @@
     },
     {
       "apiVersion": "2014-04-01",
-      "name": "[parameters('appInsightsName')]",
+      "name": "[variables('appInsightsName')]",
       "type": "Microsoft.Insights/components",
       "location": "Central US",
       "tags": { },
@@ -81,7 +81,7 @@
           "dependsOn": [
             "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
             "[resourceId('Microsoft.Sql/servers/databases', variables('dbServerName'), parameters('dbName'))]",
-            "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]"
+            "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
           ],
           "properties": {
             "COMPANY_NAME": "[parameters('companyName')]",
@@ -92,8 +92,18 @@
             "DB_USER": "[parameters('dbAdminUser')]",
             "DB_PASSWORD": "[parameters('dbAdminPassword')]",
 
-            "INSTRUMENTATION_KEY": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2014-04-01').InstrumentationKey]"
+            "INSTRUMENTATION_KEY": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2014-04-01').InstrumentationKey]"
           }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "",
+          "type": "extensions",
+          "properties": { "packageUri": "https://ptvs.blob.core.windows.net/temp/python351x64.3.5.1.0.nupkg" },
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('siteName'))]",
+            "[resourceId('Microsoft.Web/sites/config', parameters('siteName'), 'appsettings')]"
+          ]
         }
       ]
     }

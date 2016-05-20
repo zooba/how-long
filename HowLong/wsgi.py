@@ -24,6 +24,8 @@ from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
 # Apply WSGI middleware here.
-if os.getenv('INSTRUMENTATION_KEY'):
+instrumentation_key = os.getenv('INSTRUMENTATION_KEY')
+if instrumentation_key:
     from applicationinsights.requests import WSGIApplication as AppInsightsMiddleware
-    application = AppInsightsMiddleware(os.getenv('INSTRUMENTATION_KEY'), application)
+    application = AppInsightsMiddleware(instrumentation_key, application)
+    print('Using Application Insights (key: {})'.format(instrumentation_key))

@@ -90,19 +90,21 @@ TEMP_ROOT = DEPLOY_ROOT / '_deploytmp'
 if not TEMP_ROOT.is_dir():
     TEMP_ROOT.mkdir()
 
-print('Collecting files to deploy')
-DEPLOY_FILES = [(s, d) for s, d in [
-    *get_package('app'),
-    *get_package('HowLong'),
-    *get_package('static'),
-    (DEPLOY_ROOT / 'manage.py', 'manage.py'),
-    (DEPLOY_ROOT / 'runserver.py', 'runserver.py'),
-    (DEPLOY_ROOT / 'create_test_data.py', 'create_test_data.py'),
-    (DEPLOY_ROOT / 'web.config', 'web.config'),
-    (DEPLOY_ROOT / 'static.web.config', 'static\\web.config'),
-    *get_requirements(DEPLOY_ROOT / 'requirements.txt', TEMP_ROOT),
-] if '__pycache__' not in s.parts]
-print('Collected', len(DEPLOY_FILES), 'files')
+def get_deploy_files():
+    print('Collecting files to deploy')
+    DEPLOY_FILES = [(s, d) for s, d in [
+        *get_package('app'),
+        *get_package('HowLong'),
+        *get_package('static'),
+        (DEPLOY_ROOT / 'manage.py', 'manage.py'),
+        (DEPLOY_ROOT / 'runserver.py', 'runserver.py'),
+        (DEPLOY_ROOT / 'create_test_data.py', 'create_test_data.py'),
+        (DEPLOY_ROOT / 'web.config', 'web.config'),
+        (DEPLOY_ROOT / 'static.web.config', 'static\\web.config'),
+        *get_requirements(DEPLOY_ROOT / 'requirements.txt', TEMP_ROOT),
+    ] if '__pycache__' not in s.parts]
+    print('Collected', len(DEPLOY_FILES), 'files')
+    return DEPLOY_FILES
 
 #################################################
 # Create management clients
@@ -189,21 +191,21 @@ try:
 
     site = Site(CREDENTIALS, SUBSCRIPTION_ID, RESOURCE_GROUP, WEBSITE)
     
-    site.upload_python('3.5.1', 'site/python')
+    #site.upload_python('3.5.1', 'site/python')
 
     zip_data = io.BytesIO()
     with zipfile.ZipFile(zip_data, 'w', compression=zipfile.ZIP_DEFLATED) as zip:
-        for src, dest in DEPLOY_FILES:
+        for src, dest in get_deploy_files():
             zip.write(str(src), dest)
     site.upload_zip(zip_data.getvalue(), 'site/wwwroot')
 
     # Trigger a Django collectstatic on the server
-    print('Migrating Django DB')
-    print(site.exec(r"D:\home\site\python\python.exe D:\home\site\wwwroot\manage.py collectstatic --noinput", r"D:\home\site\wwwroot"))
+    print('Collecting static files')
+    print(site.exec(r"D:\home\site\python\python.exe D:\home\site\wwwroot\manage.py collectstatic --noinput", r"D:\home\site\wwwroot") or 'Success')
 
     # Trigger a Django migrate on the server
     print('Migrating Django DB')
-    print(site.exec(r"D:\home\site\python\python.exe D:\home\site\wwwroot\manage.py migrate", r"D:\home\site\wwwroot"))
+    print(site.exec(r"D:\home\site\python\python.exe D:\home\site\wwwroot\manage.py migrate", r"D:\home\site\wwwroot") or 'Success')
 
     #################################################
     # Navigate to the site
@@ -213,6 +215,21 @@ try:
     print('Site is available at:')
     for name in host_names:
         print('   ', name)
+
+    result = rc.resources.get(
+        RESOURCE_GROUP,
+        "Microsoft.Sql",
+        "servers",
+        "", "", "2014-04-01",
+        raw=True
+    ).response.json()
+    
+    print()
+    print('Databases are available at:')
+    for db in result['value']:
+        print('  ', db['properties'].get('fullyQualifiedDomainName') or db['name'])
+        print('    User:', db['properties'].get('administratorLogin') or '(unknown)')
+        print('    Pass:', DATABASE_ADMIN_PASS)
     print()
 
     if 'y' in input("Browse to {}? [y/N] ".format(host_names[0])).lower():
