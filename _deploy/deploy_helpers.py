@@ -31,31 +31,18 @@ def print_operation_results(resources_client, resource_group, deployment):
             continue
 
         try:
-            status = op.status_code
+            status = props.status_code
+            if props.target_resource:
+                rtype, rname = props.target_resource.resource_type, props.target_resource.resource_name
+            else:
+                rtype, rname = '', ''
         except Exception:
             traceback.print_exc()
             print(props)
             continue
 
-        try:
-            target = op.target_resource
-        except Exception:
-            traceback.print_exc()
-            print(status)
-            continue
+        print("{}: {} {}".format(status, rtype, rname))
 
-        print(target, status)
-
-
-# HACK: Patch User model so we get scm_uri back
-from azure.mgmt.web.models import User
-User._attribute_map['scm_uri'] = {'key': 'properties.scmUri', 'type': 'str'}
-_User_init = User.__init__
-def User_init(s, *a, **kw):
-    s.scm_uri = kw.pop('scm_uri', '')
-    _User_init(s, *a, **kw)
-User.__init__ = User_init
-# End of hack
 
 class Site:
     def __init__(self, credentials, subscription_id, resource_group, website):
@@ -68,9 +55,10 @@ class Site:
     def _ensure_api(self):
         if self._api_url:
             return
-        scm_uri = self._wsc.sites.list_site_publishing_credentials(
+        user = self._wsc.sites.list_site_publishing_credentials(
             self._resource_group, self._website
-        ).result().scm_uri
+        ).result()
+        scm_uri = user.scm_uri
 
         scheme, netloc, path, query, fragment = urlsplit(scm_uri)
         userpass, netloc = splituser(netloc)

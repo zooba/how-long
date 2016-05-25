@@ -187,6 +187,7 @@ try:
     print('Success')
     print()
 
+    # TODO: Need to set SSL_CERT_FILE variable
     print('Installing packages')
     print(site.exec(r"D:\home\Python35\python.exe -m pip install --disable-pip-version-check -r requirements.txt") or 'Success')
     print()
