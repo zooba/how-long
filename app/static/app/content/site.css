@@ -3,6 +3,17 @@ body {
     padding-bottom: 20px;
 }
 
+body { font-size: 26px; }
+p { font-size: 26px; }
+h1 { font-size: 60px; }
+h2 { font-size: 50px; }
+
+td, th { font-size: 24px !important; line-height: 26px !important; }
+
+.lead { font-size: 32px; }
+.navbar-brand { font-size: 32px; }
+.navbar { min-height: 60px; }
+
 /* Set padding to keep content from hitting the edges */
 .body-content {
     padding-left: 15px;

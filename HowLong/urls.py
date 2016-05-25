@@ -20,6 +20,7 @@ urlpatterns = [
 
     url(r'^generate$', app.views.generate, name='generate'),
     url(r'^employees$', app.views.employees, name='employees'),
+    url(r'^employee/(?P<employee_name>\w{0,100})/$', app.views.employee, name='employee'),
 
     url(r'^admin/', include(admin.site.urls)),
 ]

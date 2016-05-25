@@ -16,5 +16,9 @@ class Employee(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(null=True)
 
+    @property
+    def www(self):
+        return '/employee/' + self.name
+
     def __str__(self):
         return '{} ({})'.format(self.name, self.department)

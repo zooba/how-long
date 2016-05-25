@@ -50,8 +50,8 @@ if not CREDENTIALS:
 if not SUBSCRIPTION_ID:
     # Display a list of available subscriptions if SUBSCRIPTION_ID was not given
 
-    from azure.mgmt.resource.subscriptions import SubscriptionClient, SubscriptionClientConfiguration
-    sc = SubscriptionClient(SubscriptionClientConfiguration(CREDENTIALS))
+    from azure.mgmt.resource.subscriptions import SubscriptionClient
+    sc = SubscriptionClient(CREDENTIALS)
     print('SUBSCRIPTION_ID was not provided. Select an id from the following list.')
     for sub in sc.subscriptions.list():
         print('    {}: {}'.format(sub.subscription_id, sub.display_name))
@@ -60,7 +60,7 @@ if not SUBSCRIPTION_ID:
 #endregion
 #################################################
 
-from azure.mgmt.resource.resources import ResourceManagementClientConfiguration, ResourceManagementClient
+from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.resource.resources.models import ResourceGroup, DeploymentProperties, DeploymentMode
 
 from _deploy.deploy_helpers import get_package, print_operation_results, Site
@@ -103,10 +103,7 @@ def get_deploy_files():
 #################################################
 # Create management clients
 
-rc = ResourceManagementClient(ResourceManagementClientConfiguration(
-    credentials=CREDENTIALS,
-    subscription_id=SUBSCRIPTION_ID,
-))
+rc = ResourceManagementClient(credentials=CREDENTIALS, subscription_id=SUBSCRIPTION_ID)
 
 #################################################
 # Create a resource group

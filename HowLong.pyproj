@@ -7,7 +7,7 @@
     <Environment>
     </Environment>
     <WebBrowserPort>60227</WebBrowserPort>
-    <WebBrowserUrl>http://localhost</WebBrowserUrl>
+    <WebBrowserUrl>http://localhost/employees</WebBrowserUrl>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <UseIISExpress>true</UseIISExpress>
   </PropertyGroup>
@@ -39,6 +39,12 @@
     <Compile Include="app\forms.py" />
     <Compile Include="app\migrations\0001_initial.py" />
     <Compile Include="app\models.py" />
+    <Compile Include="app\prediction.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app\tables.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="app\tests.py" />
     <Compile Include="app\views.py" />
     <Compile Include="app\__init__.py" />
@@ -77,6 +83,7 @@
     <Folder Include="_deploy\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="app\templates\app\employee.html" />
     <Content Include="app\templates\app\employees.html" />
     <Content Include="app\templates\app\generating.html" />
     <Content Include="httpplatform.web.config" />

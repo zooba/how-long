@@ -1,4 +1,4 @@
-from azure.mgmt.web import WebSiteManagementClient, WebSiteManagementClientConfiguration
+from azure.mgmt.web import WebSiteManagementClient
 
 from importlib.util import find_spec
 from pathlib import Path
@@ -6,8 +6,6 @@ from urllib.parse import urlsplit, urlunsplit, splitpasswd, splituser, urljoin
 
 import io
 import requests
-import subprocess
-import sys
 import traceback
 import zipfile
 
@@ -61,9 +59,7 @@ User.__init__ = User_init
 
 class Site:
     def __init__(self, credentials, subscription_id, resource_group, website):
-        self._wsc = WebSiteManagementClient(WebSiteManagementClientConfiguration(
-            credentials, subscription_id
-        ))
+        self._wsc = WebSiteManagementClient(credentials, subscription_id)
         self._resource_group = resource_group
         self._website = website
         self._api_url = None

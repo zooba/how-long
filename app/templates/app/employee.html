@@ -1,0 +1,27 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Employee Info</h2>
+        <p>Name: {{ name }}</p>
+        <p>Department: {{ department }}</p>
+        <p>Current: {% if end_date %} No {% else %} Yes {% endif %}</p>
+    </div>
+
+    <div class="col-md-4">
+        <h2>History</h2>
+        <p>Start Date: {{ start_date }}</p>
+        <p>End Date: {% if end_date %} {{ end_date }} {% else %} 'N/A' {% endif %}</p>
+        <p>Total Days: {{ total_days }}</p>
+    </div>
+
+    <div class="col-md-4">
+        <h2>Prediction</h2>
+        <p>Expected Days: {{ expected_days.days }}</p>
+        <p>Expected End Date: {{ expected_end_date }}</p>
+    </div>
+</div>
+
+{% endblock %}
