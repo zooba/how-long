@@ -54,9 +54,6 @@
     <Compile Include="HowLong\settings.py" />
     <Compile Include="HowLong\urls.py" />
     <Compile Include="HowLong\wsgi.py" />
-    <Compile Include="runserver.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="_deploy\deploy_helpers.py">
       <SubType>Code</SubType>
     </Compile>
