@@ -11,13 +11,10 @@ credentials to your Azure account.
 __author__ = "Steve Dower <steve.dower@microsoft.com>"
 __version__ = "1.0.0"
 
-import io
 import json
 import pathlib
 import sys
 import uuid
-import zipfile
-
 
 #################################################
 #region Credential Boilerplate
@@ -66,7 +63,7 @@ if not SUBSCRIPTION_ID:
 from azure.mgmt.resource.resources import ResourceManagementClientConfiguration, ResourceManagementClient
 from azure.mgmt.resource.resources.models import ResourceGroup, DeploymentProperties, DeploymentMode
 
-from _deploy.deploy_helpers import get_package, get_requirements, print_operation_results, Site
+from _deploy.deploy_helpers import get_package, print_operation_results, Site
 
 #################################################
 # Constants for this deployment.
@@ -82,7 +79,7 @@ DEPLOYMENT = "ContosoInternalApps"
 WEBSITE = "HowLong" + uuid.uuid4().hex
 
 DATABASE_ADMIN_USER = 'contosodb'
-DATABASE_ADMIN_PASS = "PW!" + uuid.uuid4().hex
+DATABASE_ADMIN_PASS = "PW-" + uuid.uuid4().hex
 DATABASE_NAME = 'howlong'
 
 DEPLOY_ROOT = pathlib.Path(__file__).absolute().parent.parent
@@ -91,20 +88,17 @@ if not TEMP_ROOT.is_dir():
     TEMP_ROOT.mkdir()
 
 def get_deploy_files():
-    print('Collecting files to deploy')
-    DEPLOY_FILES = [(s, d) for s, d in [
+    return [(s, d) for s, d in [
         *get_package('app'),
         *get_package('HowLong'),
         *get_package('static'),
+        *get_package('wheelhouse'),
+        (DEPLOY_ROOT / 'requirements.txt', 'requirements.txt'),
         (DEPLOY_ROOT / 'manage.py', 'manage.py'),
-        (DEPLOY_ROOT / 'runserver.py', 'runserver.py'),
         (DEPLOY_ROOT / 'create_test_data.py', 'create_test_data.py'),
         (DEPLOY_ROOT / 'web.config', 'web.config'),
         (DEPLOY_ROOT / 'static.web.config', 'static\\web.config'),
-        *get_requirements(DEPLOY_ROOT / 'requirements.txt', TEMP_ROOT),
     ] if '__pycache__' not in s.parts]
-    print('Collected', len(DEPLOY_FILES), 'files')
-    return DEPLOY_FILES
 
 #################################################
 # Create management clients
@@ -191,21 +185,22 @@ try:
 
     site = Site(CREDENTIALS, SUBSCRIPTION_ID, RESOURCE_GROUP, WEBSITE)
     
-    #site.upload_python('3.5.1', 'site/python')
+    print('Uploading source files')
+    site.upload_files(get_deploy_files(), 'site/wwwroot')
+    print('Success')
+    print()
 
-    zip_data = io.BytesIO()
-    with zipfile.ZipFile(zip_data, 'w', compression=zipfile.ZIP_DEFLATED) as zip:
-        for src, dest in get_deploy_files():
-            zip.write(str(src), dest)
-    site.upload_zip(zip_data.getvalue(), 'site/wwwroot')
+    print('Installing packages')
+    print(site.exec(r"D:\home\Python35\python.exe -m pip install --disable-pip-version-check -r requirements.txt") or 'Success')
+    print()
 
-    # Trigger a Django collectstatic on the server
     print('Collecting static files')
-    print(site.exec(r"D:\home\site\python\python.exe D:\home\site\wwwroot\manage.py collectstatic --noinput", r"D:\home\site\wwwroot") or 'Success')
+    print(site.exec(r"D:\home\Python35\python.exe D:\home\site\wwwroot\manage.py collectstatic --noinput") or 'Success')
+    print()
 
-    # Trigger a Django migrate on the server
     print('Migrating Django DB')
-    print(site.exec(r"D:\home\site\python\python.exe D:\home\site\wwwroot\manage.py migrate", r"D:\home\site\wwwroot") or 'Success')
+    print(site.exec(r"D:\home\Python35\python.exe D:\home\site\wwwroot\manage.py migrate") or 'Success')
+    print()
 
     #################################################
     # Navigate to the site

@@ -22,10 +22,3 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "HowLong.settings")
 # setting points here.
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
-
-# Apply WSGI middleware here.
-instrumentation_key = os.getenv('INSTRUMENTATION_KEY')
-if instrumentation_key:
-    from applicationinsights.requests import WSGIApplication as AppInsightsMiddleware
-    application = AppInsightsMiddleware(instrumentation_key, application)
-    print('Using Application Insights (key: {})'.format(instrumentation_key))

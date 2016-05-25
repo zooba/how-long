@@ -5,4 +5,3 @@ django-tables2 >=1.2
 pyodbc==3.0.10
 django-pyodbc-azure >=1.9
 requests >=2.1
-waitress >=0.9

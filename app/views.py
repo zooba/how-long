@@ -56,11 +56,11 @@ def employees(request):
 def generate(request):
     script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'create_test_data.py')
     try:
-        output = subprocess.check_call([sys.executable, script])
-    except subprocess.CalledProcessError as ex:
-        output = "Process failed with code {}".format(ex.returncode)
+        subprocess.Popen([sys.executable, script])
     except Exception:
         output = traceback.format_exc()
+    else:
+        output = ""
 
     return render(
         request,

@@ -10,6 +10,7 @@
     <WebBrowserUrl>http://localhost</WebBrowserUrl>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <UseIISExpress>true</UseIISExpress>
+    <NameOfLastUsedPublishProfile>HowLong2e1083b7727f43adb10839b560fd1f55 - Web Deploy</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -46,6 +47,7 @@
     <Compile Include="create_test_data.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="test.py" />
     <Compile Include="_deploy\deploy_credentials.py" />
     <Compile Include="manage.py" />
     <Compile Include="HowLong\__init__.py" />
@@ -81,6 +83,7 @@
   <ItemGroup>
     <Content Include="app\templates\app\employees.html" />
     <Content Include="app\templates\app\generating.html" />
+    <Content Include="httpplatform.web.config" />
     <Content Include="_deploy\deploy.json" />
     <Content Include="requirements.txt" />
     <Content Include="db.sqlite3" />

@@ -4,9 +4,12 @@ from importlib.util import find_spec
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit, splitpasswd, splituser, urljoin
 
+import io
 import requests
 import subprocess
 import sys
+import traceback
+import zipfile
 
 def get_package(name):
     n = Path(name)
@@ -21,22 +24,29 @@ def get_package(name):
     if path.is_dir():
         yield from ((f, str(f.relative_to(path.parent))) for f in path.rglob('**/*'))
 
-def get_requirements(requirements, target):
-    requirements = Path(requirements)
-    target = Path(target)
-
-    try:
-        output = subprocess.check_output([
-            sys.executable, '-m', 'pip', 'install',
-            '-r', str(requirements), '--target', str(target)
-        ], stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError:
-        print(output)
-        raise
-    return ((f, str(f.relative_to(target))) for f in target.rglob('**/*'))
-
 def print_operation_results(resources_client, resource_group, deployment):
-    pass
+    for op in resources_client.deployment_operations.list(resource_group, deployment):
+        try:
+            props = op.properties
+        except AttributeError:
+            print(op)
+            continue
+
+        try:
+            status = op.status_code
+        except Exception:
+            traceback.print_exc()
+            print(props)
+            continue
+
+        try:
+            target = op.target_resource
+        except Exception:
+            traceback.print_exc()
+            print(status)
+            continue
+
+        print(target, status)
 
 
 # HACK: Patch User model so we get scm_uri back
@@ -78,12 +88,12 @@ class Site:
             path += '/'
         requests.put(path, auth=self._api_auth).raise_for_status()
 
-    def upload_python(self, version, target):
-        self.mkdir(target)
-        self.upload_zip(
-            Path(__file__).absolute().parent / 'python-{}-embed-amd64.zip'.format(version),
-            target
-        )
+    def upload_files(self, src_dest_pairs, target):
+        zip_data = io.BytesIO()
+        with zipfile.ZipFile(zip_data, 'w', compression=zipfile.ZIP_DEFLATED) as zip:
+            for src, dest in src_dest_pairs:
+                zip.write(str(src), str(dest))
+        self.upload_zip(zip_data.getvalue(), target)
 
     def upload_zip(self, zip_or_path, target):
         self._ensure_api()
@@ -95,16 +105,16 @@ class Site:
             zip_data = zip_or_path
         requests.put(path, data=zip_data, auth=self._api_auth).raise_for_status()
 
-    def exec(self, cmd, dir):
+    def exec(self, cmd, dir=None):
         self._ensure_api()
         path = urljoin(self._api_url, '/api/command')
         resp = requests.post(path, json={
             'command': cmd,
-            'dir': dir,
+            'dir': dir or r"D:\home\site\wwwroot",
         }, auth=self._api_auth)
         resp.raise_for_status()
         output = resp.json()
-        return output.get('output') or output.get('error')
+        return output.get('Error')
 
     @property
     def host_names(self):
