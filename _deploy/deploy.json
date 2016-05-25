@@ -95,7 +95,10 @@
           "properties": {
             "failedRequestsTracing": { "enabled": true }
           },
-          "dependsOn": [ "[resourceId('Microsoft.Web/sites', parameters('siteName'))]" ]
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('siteName'))]",
+            "[resourceId('Microsoft.Web/Sites/siteextensions', parameters('siteName'), parameters('pythonPackage'))]"
+          ]
         },
         {
           "apiVersion": "2015-08-01",

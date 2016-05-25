@@ -10,7 +10,6 @@
     <WebBrowserUrl>http://localhost</WebBrowserUrl>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <UseIISExpress>true</UseIISExpress>
-    <NameOfLastUsedPublishProfile>HowLong2e1083b7727f43adb10839b560fd1f55 - Web Deploy</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
