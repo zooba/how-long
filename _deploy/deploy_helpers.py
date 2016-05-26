@@ -42,6 +42,7 @@ def print_operation_results(resources_client, resource_group, deployment):
             continue
 
         print("{}: {} {}".format(status, rtype, rname))
+    print()
 
 
 class Site:
@@ -98,7 +99,8 @@ class Site:
         }, auth=self._api_auth)
         resp.raise_for_status()
         output = resp.json()
-        return output.get('Error')
+        if output.get('Error'):
+            return '{}\n{}'.format(output.get('Output'), output.get('Error'))
 
     @property
     def host_names(self):

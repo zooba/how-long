@@ -107,6 +107,7 @@
           "dependsOn": [
             "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
             "[resourceId('Microsoft.Web/Sites/siteextensions', parameters('siteName'), parameters('pythonPackage'))]",
+            "[resourceId('Microsoft.Web/Sites/config', parameters('siteName'), 'logs')]",
             "[resourceId('Microsoft.Sql/servers/databases', variables('dbServerName'), parameters('dbName'))]",
             "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
           ],
