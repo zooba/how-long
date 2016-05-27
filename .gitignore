@@ -65,3 +65,5 @@ env/
 _deploytmp/
 bin/
 obj/
+/_deploy/deploy_credentials.py
+/.vs
