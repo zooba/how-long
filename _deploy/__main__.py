@@ -12,6 +12,7 @@ __author__ = "Steve Dower <steve.dower@microsoft.com>"
 __version__ = "1.0.0"
 
 import json
+import os
 import pathlib
 import sys
 import uuid
@@ -71,21 +72,40 @@ from _deploy.deploy_helpers import get_package, print_operation_results, Site
 # Some names include random UUIDs to avoid collisions.
 # These are not necessary in controlled environments.
 
-RESOURCE_GROUP = "demo" + uuid.uuid4().hex
-LOCATION = "West US"
+if os.path.isfile('_last_deploy.json') and '--full' not in sys.argv:
+    print('Reusing parameters from _last_deploy.json')
+    with open('_last_deploy.json', 'r') as f:
+        params = json.load(f)
+else:
+    print('Generating new deployment parameters')
+    params = {
+        'RESOURCE_GROUP': "demo" + uuid.uuid4().hex,
+        'DEPLOYMENT': "ContosoInternalApps",
+        'LOCATION': "West US",
 
-COMPANY_NAME = "Contoso"
-DEPLOYMENT = "ContosoInternalApps"
-WEBSITE = "HowLong" + uuid.uuid4().hex
+        'COMPANY_NAME': "Contoso",
+        'WEBSITE': "HowLong" + uuid.uuid4().hex,
 
-DATABASE_ADMIN_USER = 'contosodb'
-DATABASE_ADMIN_PASS = "PW-" + uuid.uuid4().hex
-DATABASE_NAME = 'howlong'
+        'DATABASE_ADMIN_USER': "contosodb",
+        'DATABASE_ADMIN_PASS': "PW-" + uuid.uuid4().hex,
+        'DATABASE_NAME': "howlong",
+    }
+
+    with open('_last_deploy.json', 'w') as f:
+        json.dump(params, f)
+
+RESOURCE_GROUP = params['RESOURCE_GROUP']
+DEPLOYMENT = params['DEPLOYMENT']
+LOCATION = params['LOCATION']
+
+COMPANY_NAME = params['COMPANY_NAME']
+WEBSITE = params['WEBSITE']
+
+DATABASE_ADMIN_USER = params['DATABASE_ADMIN_USER']
+DATABASE_ADMIN_PASS = params['DATABASE_ADMIN_PASS']
+DATABASE_NAME = params['DATABASE_NAME']
 
 DEPLOY_ROOT = pathlib.Path(__file__).absolute().parent.parent
-TEMP_ROOT = DEPLOY_ROOT / '_deploytmp'
-if not TEMP_ROOT.is_dir():
-    TEMP_ROOT.mkdir()
 
 def get_deploy_files():
     return [(s, d) for s, d in [
