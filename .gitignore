@@ -67,3 +67,7 @@ bin/
 obj/
 /_deploy/deploy_credentials.py
 /.vs
+/env1
+/static
+*.user
+/db.sqlite3

@@ -120,14 +120,12 @@
   <ItemGroup>
     <Interpreter Include="env\">
       <Id>env</Id>
-      <BaseInterpreter>Global|PythonCore|3.5|x64</BaseInterpreter>
       <Version>3.5</Version>
-      <Description>env</Description>
+      <Description>env (Python 3.5 (64-bit))</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
-      <LibraryPath>Lib\</LibraryPath>
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
-      <Architecture>Amd64</Architecture>
+      <Architecture>X64</Architecture>
     </Interpreter>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Django.targets" />
